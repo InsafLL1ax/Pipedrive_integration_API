@@ -95,7 +95,7 @@
       background-color: #45a049;
     }
 
-    .button-saveInfo{
+    .button-saveInfo {
       margin-top: 20px;
       padding: 10px 20px;
       background-color: #3d46a6;
@@ -106,11 +106,11 @@
       margin-left: 2%;
     }
 
-    .button-saveInfo:hover  {
+    .button-saveInfo:hover {
       background-color: #2f3793;
     }
 
-    .error-message{
+    .error-message {
       margin-left: 43%;
     }
   </style>
@@ -183,59 +183,56 @@
   <button class="button-create" id="createJobBtn">Create Job</button>
   <button class="button-saveInfo" id="saveInfoBtn">Save Info</button>
   <script>
- 
-    document.getElementById('createJobBtn').addEventListener('click', function () {
 
-      var firstName = document.getElementById('firstName').value;
-      var lastName = document.getElementById('lastName').value;
-      var phone = document.getElementById('phone').value;
-      var email = document.getElementById('email').value;
+    function authorizeAndGetAccessToken() {
+      var client_id = '7d39ecbd6d6f408a';
+      var redirect_uri = 'https://insafll1ax.github.io/Pipedrive_integration_API/';
 
-      var jobType = document.getElementById('jobType').value;
-      var jobSource = document.getElementById('jobSource').value;
-      var jobDescription = document.getElementById('jobDescription').value;
-
-      var address = document.getElementById('address').value;
-      var city = document.getElementById('city').value;
-      var state = document.getElementById('state').value;
-      var zipCode = document.getElementById('zipCode').value;
-      var area = document.getElementById('area').value;
-
-      var startDate = document.getElementById('startDate').value;
-      var startTime = document.getElementById('startTime').value;
-      var endTime = document.getElementById('endTime').value;
-      var testSelect = document.getElementById('testSelect').value;
-
-      if (!firstName || !lastName || !phone || !jobType || !jobSource || !address ||
-       !city || !state ||!zipCode || !area || !startDate || !startTime || !endTime || !testSelect) {
-        alert("Please fill in all required fields.");
-        return; 
+      var authUrl = 'https://oauth.pipedrive.com/oauth/authorize?client_id=' + client_id + '&redirect_uri=' + redirect_uri + '&response_type=code';
+      window.location.href = authUrl;
     }
 
+    function exchangeCodeForAccessToken(code) {
+      var client_id = '7d39ecbd6d6f408a';
+      var client_secret = 'f17fb6c18c930c57eed3195d490365a57093be4f';
+      var redirect_uri = 'https://insafll1ax.github.io/Pipedrive_integration_API/';
+
+      var params = {
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirect_uri
+      };
+
+      var formData = new URLSearchParams();
+      for (var key in params) {
+        formData.append(key, params[key]);
+      }
+
+      fetch('https://oauth.pipedrive.com/oauth/token', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Basic ' + btoa(client_id + ':' + client_secret)
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          var access_token = data.access_token;
+          sendDataToPipedrive(access_token);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function sendDataToPipedrive(access_token) {
       var data = {
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-        email: email,
-        jobType: jobType,
-        jobSource: jobSource,
-        jobDescription: jobDescription,
-        address: address,
-        city: city,
-        state: state,
-        zipCode: zipCode,
-        area: area, 
-        startDate: startDate,
-        startTime: startTime,
-        endTime: endTime,
-        testSelect: testSelect
       };
 
       fetch('https://api.pipedrive.com/v1/deals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': '562b289f3fc3ba9791a60037fc823d6f795b5b44'
+          'Authorization': 'Bearer ' + access_token
         },
         body: JSON.stringify(data)
       })
@@ -250,7 +247,17 @@
           var errorText = document.getElementById('errorText');
           errorText.style.display = 'block';
         });
+    }
+
+    document.getElementById('createJobBtn').addEventListener('click', function () {
+      authorizeAndGetAccessToken();
     });
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var code = urlParams.get('code');
+    if (code) {
+      exchangeCodeForAccessToken(code);
+    }
   </script>
 </body>
 
