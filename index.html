@@ -271,10 +271,12 @@
 
     } else {
       const clientId = '7d39ecbd6d6f408a';
-      const redirectUri = 'https://insafll1ax.github.io/Pipedrive_integration_API/';
-      window.location.href = `https://oauth.pipedrive.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token`;
-    }
+      var redirect_uri = 'https://insafll1ax.github.io/Pipedrive_integration_API/';
 
+      if (!window.location.hash) {
+        window.location.href = `https://oauth.pipedrive.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token`;
+      }
+    }
   </script>
 </body>
 
