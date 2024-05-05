@@ -275,8 +275,10 @@ if (hashParams.access_token) {
     const redirectUri = 'https://insafll1ax.github.io/Pipedrive_integration_API/';
 
     if (!window.location.hash) {
+    setTimeout(function() {
         window.location.href = `https://oauth.pipedrive.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token`;
-    }
+    }, 0);
+}
 }
 
   </script>
